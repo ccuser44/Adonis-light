@@ -2,7 +2,9 @@ return {
 	{Text = "Sceleratis/Davey_Bones",	Desc = "Made Adonis & EISS"};
 	{Text = "Kohltastrophe (Scripth)",	Desc = "For his help with various things and some code"};
 	{Text = "einsteinK",				Desc = "Helped me with some scripting problems early in development and put together the LoadstringParser; Best scripter I know"};
-	{Text = "Rerumu (Shining_Diamando)",Desc = "Made the endless stairs place\nRerubi (Bytecode Interpreter)\nParser\nSteampunk theme"};
+	{Text = "Rerumu (Shining_Diamando)",Desc = "Made the endless stairs place\nRerubi (No longer used)\nFiOne (Bytecode Interpreter)\nParser\nSteampunk theme"};
+	{Text = "Cald_fan", 				Desc = "Made the WebPanel"};
+	{Text = "joritochip",				Desc = "WebPanel Contributor"};
 	{Text = "",		Desc = ""};
 	{Text = "@GitHub MudockYatho", 		Desc = "GitHub Contributor"};	
 	{Text = "@GitHub TheCakeChicken", 	Desc = "GitHub Contributor"};
@@ -20,6 +22,8 @@ return {
 	{Text = "@GitHub TheLegendarySpark",Desc = "GitHub Contributor"};
 	{Text = "@GitHub joritochip",		Desc = "GitHub Contributor"};
 	{Text = "@GitHub DarkBro",			Desc = "GitHub Contributor"};
+	{Text = "@GitHub pbstFusion",		Desc = "GitHub Contributor"};
+	{Text = "@GitHub policetonyR",		Desc = "GitHub Contributor"};
 	{Text = "",		Desc = "Everyone else"};
 	{Text = "Stravant/JustAPerson/Jason Priest (?)", Desc = "Wrote LBI (No longer used)"};	
 	{Text = "darkelementallord",		Desc = "Updated some guis"};

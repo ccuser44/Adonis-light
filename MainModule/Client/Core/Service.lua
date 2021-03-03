@@ -70,6 +70,7 @@ return function(errorHandler, eventChecker, fenceSpecific)
 	local FilterCache = {}
 	local TrackedTasks = {}
 	local RunningLoops = {}
+	local TaskSchedulers = {}
 	local ServiceVariables = {}
 	local CreatedItems = setmetatable({},{__mode = "v"});
 	local Wrappers = setmetatable({},{__mode = "kv"});
@@ -124,6 +125,53 @@ return function(errorHandler, eventChecker, fenceSpecific)
 
 		GetTasks = function()
 			return TrackedTasks
+		end;
+		
+		TaskScheduler = function(taskName, props)
+			local props = props or {};
+			if not props.Temporary and TaskSchedulers[taskName] then return TaskSchedulers[taskName] end
+			
+			local new = {
+				Name = taskName;
+				Running = true;
+				Properties = props;
+				LinkedTasks = {};
+				RunnerEvent = service.New("BindableEvent");
+			}
+
+			function new:Trigger(self, ...) 
+				self.Event:Fire(...) 
+			end;
+			
+			function new:Delete(self)
+				if not props.Temporary then 
+					TaskSchedulers[taskName] = nil; 
+				end
+				
+				new.Running = false;
+				new.Event:Disconnect();
+			end;
+			
+			new.Event = new.RunnerEvent.Event:Connect(function(...)
+				for i,v in next,new.LinkedTasks do
+					local ran,result = pcall(v);
+					if result then
+						table.remove(new.LinkedTasks, i);
+					end
+				end
+			end)
+			
+			if props.Interval then
+				while wait(props.Interval) and new.Running do
+					new:Trigger(os.time());
+				end
+			end
+			
+			if not props.Temporary then
+				TaskSchedulers[taskName] = new;
+			end
+			
+			return new;
 		end;
 
 		Events = setmetatable({},{
@@ -1028,7 +1076,7 @@ return function(errorHandler, eventChecker, fenceSpecific)
 		GamepassService = game:service("GamePassService");
 		ChatService = game:service("Chat");
 		Gamepasses = game:service("GamePassService");
-		Delete = function(obj,num) game:service("Debris"):AddItem(obj,(num or 0)) pcall(obj.Delete, obj) end;
+		Delete = function(obj,num) game:service("Debris"):AddItem(obj,(num or 0)) pcall(obj.Destroy, obj) end;
 		RbxEvent = function(signal, func) local event = signal:connect(func) table.insert(RbxEvents, event) return event end;
 		SelfEvent = function(signal, func) local rbxevent = service.RbxEvent(signal, function(...) func(...) end) end;
 		DelRbxEvent = function(signal) for i,v in next,RbxEvents do if v == signal then v:Disconnect() table.remove(RbxEvents, i) end end end;

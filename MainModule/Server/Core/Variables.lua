@@ -37,6 +37,7 @@ return function(Vargs)
 		BanMessage = "Banned";
 		LockMessage = "Not Whitelisted";
 		DonorPass = {1348327,1990427,1911740,167686,98593};
+		WebPanel_Initiated = false;
 		LightingSettings = {
 			Ambient = service.Lighting.Ambient;
 			OutdoorAmbient = service.Lighting.OutdoorAmbient;
@@ -89,6 +90,8 @@ return function(Vargs)
 		LocalEffects = {};
 		
 		SizedCharacters = {};
+		
+		BundleCache = {};
 		
 		MusicList = {
 			{Name='jericho',ID=292340735};
@@ -147,6 +150,10 @@ return function(Vargs)
 			{Name="stereolove",ID=142318819};
 			{Name="minecraftorchestral",ID=148900687};
 			{Name="superbacon",ID=300872612};
+			{Name="alonemarsh",ID=639750143}; -- Alone - Marshmello
+			{Name="crabraveoof",ID=2590490779}; -- Crab rave oof
+			{Name="rickroll",ID=4581203569};
+			{Name="deathbed",ID=4966153470};
 		};
 		
 		InsertList = {};

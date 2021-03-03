@@ -562,7 +562,7 @@ return function(Vargs)
 				end)
 
 
-				Core.CrossServer("TableRemove", data);
+				Core.CrossServer("LoadData", "SavedTables");
 			elseif type == "TableAdd" then
 				local tab = data.Table
 				local value = data.Value
@@ -581,7 +581,7 @@ return function(Vargs)
 					return sets
 				end)
 
-				Core.CrossServer("TableAdd", data);
+				Core.CrossServer("LoadData", "SavedTables");
 			end
 
 			Logs.AddLog(Logs.Script,{
@@ -609,6 +609,7 @@ return function(Vargs)
 				TimeBan = false;
 				AdminNotes = {};
 				Keybinds = {};
+				Aliases = {};
 				Client = {};
 				Warnings = {};
 				AdminPoints = 0;

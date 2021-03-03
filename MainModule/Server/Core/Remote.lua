@@ -252,6 +252,23 @@ return function(Vargs)
 				end
 				return resp
 			end;
+			
+			UpdateAliases = function(p, args)
+				local aliases = args[1] or {};
+				
+				if type(aliases) == "table" then
+					local data = Core.GetPlayer(p)
+					
+					--// check for stupid stuff
+					for i,v in next,aliases do
+						if type(i) ~= "string" or type(v) ~= "string" then
+							aliases[i] = nil
+						end
+					end
+					
+					data.Aliases = aliases;
+				end
+			end;
 
 			PlayerData = function(p,args)
 				local data = Core.GetPlayer(p)
@@ -271,7 +288,9 @@ return function(Vargs)
 				local commands = Admin.SearchCommands(p,args[1] or "all")
 				local tab = {}
 				for i,v in pairs(commands) do
-					table.insert(tab,Admin.FormatCommand(v))
+					if not v.Hidden and not v.Disabled then
+						table.insert(tab,Admin.FormatCommand(v))
+					end
 				end
 				return tab
 			end;
@@ -584,7 +603,7 @@ return function(Vargs)
 			end;
 
 			PlayerEvent = function(p,args)
-				service.Events[tostring(args[1])..p.userId]:fire(unpack(args,2))
+				service.Events[tostring(args[1])..p.userId]:Fire(unpack(args,2))
 			end;
 
 			SaveTableAdd = function(p,args) 
@@ -914,7 +933,7 @@ return function(Vargs)
 		end;
 
 		NewPlayerEvent = function(p,type,func)
-			return service.Events[type..p.userId]:connect(func)
+			return service.Events[type..p.userId]:Connect(func)
 		end;
 
 		StartLoop = function(p,name,delay,funcCode)

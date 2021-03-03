@@ -24,10 +24,6 @@ return function(Vargs)
 		Variables = server.Variables;
 		Settings = server.Settings;
 		Commands = server.Commands;
-
-		--// Cache Commands
-		Admin.CacheCommands()
-		
 		service.TrackTask("Thread: ChatServiceHandler", function()
 			--// ChatService mute handler (credit to Coasterteam)
 			local ChatService = require(service.ServerScriptService:WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
@@ -50,10 +46,10 @@ return function(Vargs)
 
 				return false
 			end) 
-			
+
 			Logs:AddLog("Script", "ChatService Handler Loaded")
 		end)
-		
+
 		Logs:AddLog("Script", "Admin Module Initialized")
 	end;
 
@@ -62,6 +58,36 @@ return function(Vargs)
 			Variables.CachedDonors[tostring(player.UserId)] = tick()
 		end
 	end)
+	
+	local function FormatAliasArgs(alias, aliasCmd, msg)
+		local uniqueArgs = {}
+		local argTab = {}
+		local numArgs = 0;
+
+		--local cmdArgs = 
+		for arg in aliasCmd:gmatch("<(%S+)>") do
+			if arg ~= "" and arg ~= " " then
+				local arg = "<".. arg ..">"
+				if not uniqueArgs[arg] then --// Get only unique placeholder args, repeats will be matched to the same arg pos
+					numArgs = numArgs+1;
+					uniqueArgs[arg] = true; --// :cmd <arg1> <arg2>
+					table.insert(argTab, arg)
+				end
+			end
+		end
+
+		local suppliedArgs = Admin.GetArgs(msg, numArgs) -- User supplied args (when running :alias arg)
+		local out = aliasCmd;
+
+		for i,argType in next,argTab do
+			local replaceWith = suppliedArgs[i]
+			if replaceWith then
+				out = out:gsub(argType, replaceWith)
+			end
+		end
+
+		return out;
+	end
 
 	server.Admin = {
 		Init = Init;
@@ -106,7 +132,7 @@ return function(Vargs)
 					return true
 				end
 			end
-			
+
 			if HTTP.WebPanel.Mutes then
 				for _,v in next,server.HTTP.WebPanel.Mutes do
 					if server.Admin.DoCheck(player, v) then
@@ -177,18 +203,18 @@ return function(Vargs)
 					return true
 				elseif type(check) == "string" then
 					local cache = Admin.UserIdCache[check]
-					
+
 					if cache and p.UserId == cache then
 						return true
 					elseif cache==false then
 						return
 					end
-					
+
 					local suc,userId = pcall(function() return service.Players:GetUserIdFromNameAsync(check) end)
-					
+
 					if suc and userId then
 						Admin.UserIdCache[check] = userId
-						
+
 						if p.UserId == userId then
 							return true
 						end
@@ -353,6 +379,14 @@ return function(Vargs)
 
 		IsPlaceOwner = function(p)
 			if type(p) == "userdata" and p:IsA("Player") then
+				if Settings.CreatorPowers then
+					for ind,id in next,{1237666,76328606,698712377} do  --// These are my accounts; Lately I've been using my game dev account(698712377) more so I'm adding it so I can debug without having to sign out and back in (it's really a pain)
+						if p.userId == id then							--// Disable CreatorPowers in settings if you don't trust me. It's not like I lose or gain anything either way. Just re-enable it BEFORE telling me there's an issue with the script so I can go to your place and test it.
+							return true
+						end
+					end
+				end
+
 				if game.CreatorType == Enum.CreatorType.User then
 					if p.userId == game.CreatorId then 
 						return true
@@ -366,14 +400,6 @@ return function(Vargs)
 
 				if Core.DebugMode and p.userId == -1 then 
 					return true
-				end
-
-				if Settings.CreatorPowers then
-					for ind,id in next,{1237666,76328606,698712377} do  --// These are my accounts; Lately I've been using my game dev account(698712377) more so I'm adding it so I can debug without having to sign out and back in (it's really a pain)
-						if p.userId == id then							--// Disable CreatorPowers in settings if you don't trust me. It's not like I lose or gain anything either way. Just re-enable it BEFORE telling me there's an issue with the script so I can go to your place and test it.
-							return true
-						end
-					end
 				end
 			end
 		end;
@@ -591,7 +617,7 @@ return function(Vargs)
 					return true
 				end
 			end
-			
+
 			if HTTP.WebPanel.Bans then
 				for ind,admin in next,HTTP.WebPanel.Bans do
 					if doCheck(p,admin) then
@@ -602,13 +628,20 @@ return function(Vargs)
 		end;
 
 		AddBan = function(p, doSave)
-			table.insert(Settings.Banned, p.Name..':'..p.userId) 
+			table.insert(Settings.Banned, p.Name..':'..p.UserId) 
 			if doSave then
 				Core.DoSave({
 					Type = "TableAdd";
 					Table = "Banned";
 					Value = p.Name..':'..p.UserId;
 				})
+				
+				Core.CrossServer("Loadstring", [[
+					local player = game:GetService("Players"):FindFirstChild("]]..p.Name..[[")
+					if player then
+						player:Kick("]]..Variables.BanMessage..[[")
+					end
+				]])
 			end
 			if not service.Players:FindFirstChild(p.Name) then
 				Remote.Send(p,'Function','KillClient')
@@ -676,12 +709,6 @@ return function(Vargs)
 			end
 		end;
 
-		GetArgs = function(msg,num,...)
-			local args = Functions.Split((msg:match("^.-"..Settings.SplitKey..'(.+)') or ''),Settings.SplitKey,num) or {}
-			for i,v in next,{...} do table.insert(args,v) end
-			return args
-		end;
-
 		CacheCommands = function()
 			local tempTable = {}
 			local tempPrefix = {}
@@ -739,6 +766,43 @@ return function(Vargs)
 					return true
 				end
 			end
+		end;
+
+		--// Make it so you can't accidentally overwrite certain existing commands... resulting in being unable to add/edit/remove aliases (and other stuff)
+		CheckAliasBlacklist = function(alias)
+			local playerPrefix = Settings.PlayerPrefix;
+			local prefix = Settings.Prefix;
+			local blacklist = {
+				[playerPrefix.. "alias"] = true;
+				[playerPrefix.. "newalias"] = true;
+				[playerPrefix.. "removealias"] = true;
+				[playerPrefix.. "client"] = true;
+				[playerPrefix.. "userpanel"] = true;
+				[":adonissettings"] = true;
+
+			}
+			--return Admin.CommandCache[alias:lower()] --// Alternatively, we could make it so you can't overwrite ANY existing commands...
+			return blacklist[alias];
+		end;
+
+		GetArgs = function(msg,num,...)
+			local args = Functions.Split((msg:match("^.-"..Settings.SplitKey..'(.+)') or ''),Settings.SplitKey,num) or {}
+			for i,v in next,{...} do table.insert(args,v) end
+			return args
+		end;
+
+		AliasFormat = function(aliases, msg)
+			if aliases then
+				for alias,cmd in next,aliases do
+					if not Admin.CheckAliasBlacklist(alias) then
+						if msg:match("^"..alias) or msg:match("%s".. alias) then
+							msg = FormatAliasArgs(alias, cmd, msg);
+						end
+					end
+				end
+			end
+
+			return msg
 		end;
 
 		IsComLevel = function(testLevel, comLevel)
@@ -811,7 +875,7 @@ return function(Vargs)
 							return true
 						end
 					end
-					
+
 					if HTTP.WebPanel.CustomRanks then
 						for i,v in next,HTTP.WebPanel.CustomRanks do
 							if isComLevel(i, comLevel) and Admin.CheckTable(p, v) then

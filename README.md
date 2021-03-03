@@ -4,7 +4,7 @@ Uploaded to GitHub for collaboration and issue tracking.
 
 NOTE: Adonis is constantly changing. Whether it be new features, improvements, or the removal or modification of existing features when necessary. If a plugin you've been using suddenly stops working, something it relied on was likely changed. Adonis is updated whenever new changes are made, as opposed to other softwares that have "stable" and "nightly" branches/releases, Adonis' model on ROBLOX will always be the most up to date version, so if you have important plugins that are essential to the operation of your game, I advise that you either fork Adonis or use the version that can be found in the releases on this GitHub. You will have to manually update to get future changes. 
 
-By default, the Adonis.rbxm file in this repo may have debug mode enabled. To disable it, open Adonis_Loader > Loader > Loader.lua and change DebugMode = true to DebugMode = false in the "data" table. I recommend using the Adonis_Loader model instead.
+By default, the releases on this GitHub have DebugMode enabled, meaning the MainModule will be loaded from the parent folder of the Loader model. To disable it and instead retreive updates from the currently uploaded MainModule, open Adonis_Loader > Loader > Loader.lua and change DebugMode = true to DebugMode = false in the "data" table.
 
 Quick Start: https://youtu.be/XnhWcfoAJ_o
 
@@ -20,7 +20,7 @@ If you find any bugs or come up with useful changes feel free to submit an issue
 However, please do not submit issues caused by changes you made to your personal version of the code. If you are trying to change Adonis' code, you do so at your own risk and anything you break as a result will be on you to debug. 
 
 Feel free to seek guidance in the development channel on our Discord.
-
+ 
 ## Adonis Loader:
 
 https://www.roblox.com/library/2373505175/Adonis-Loader-BETA

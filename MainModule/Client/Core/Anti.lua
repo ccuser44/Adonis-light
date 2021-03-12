@@ -189,110 +189,6 @@ return function()
 			end)
 		end;
 
-		ReplicationLogs = function()
-			local filtering = workspace.FilteringEnabled
-
-			local function checkParent(obj,class)
-				local tester; pcall(function() tester = obj:GetFullName() end)
-				if tester then
-					local full = obj:GetFullName()
-					local prev = game
-					local blackParents = {
-						service.InsertService;
-						service.TweenService;
-						service.GamepadService;
-						service.Workspace.CurrentCamera;
-						service.LocalContainer();
-						service.Player;
-						service.Player.Character;
-					}
-
-					local blackClasses = {
-						"TouchTransmitter";
-					}
-
-					local players = service.Players:GetPlayers()
-
-					for ind,b in pairs(blackParents) do
-						if b and (rawequal(obj, b) or obj:IsDescendantOf(b)) then
-							return true
-						end
-					end
-
-					for ind,b in pairs(blackClasses) do
-						if obj:IsA(b) then
-							return true
-						end
-					end
-
-					for ind,p in pairs(players) do
-						if p and (obj:IsDescendantOf(p) or (p.Character and obj:IsDescendantOf(p.Character)))then
-							return true
-		 				end
-					end
-
-					local new = obj
-					for i=1,50 do
-						if new then
-							if (class and new:IsA(class)) and not (string.find(new.Name,"ADONIS") and new:IsA("LocalScript")) then
-								return true
-							else
-								prev = new
-							end
-						else
-							return false
-						end
-						new = obj.Parent
-					end
-
-		 			return false
-	  			else
-	 				--warn(Anti.GetClassName(obj))
-	 				return true
-				end
-	 		end
-
-			game.DescendantAdded:Connect(function(c)
-				if not filtering and not checkParent(c) then
-					--print("LOG CREATE "..c:GetFullName())
-					local data = {}
-					data.obj = c
-					data.name = c.Name
-					data.class = c.ClassName
-					data.parent = c.Parent
-					data.path = c:GetFullName()
-					Remote.Fire("AddReplication","Created",c,data)
-				end
-			end)
-
-			game.DescendantRemoving:Connect(function(c)
-				if not filtering and not checkParent(c) then
-					--print("LOG DESTROY "..c:GetFullName())
-					local data = {}
-					data.obj = c
-					data.name = c.Name
-					data.class = c.ClassName
-					data.parent = c.Parent
-					data.path = c:GetFullName()
-					if c and c.Parent then
-						local event;
-						event = c.Parent.ChildRemoved:connect(function(n)
-							if rawequal(c, n) then
-								Remote.Fire("AddReplication","Destroyed",c,data)
-								event:disconnect()
-							end
-						end)
-						wait(5)
-						if event then
-							event:disconnect()
-						end
-					else
-						Remote.Fire("AddReplication","Destroyed",c,data)
-					end
-				end
-			end)
-		end;
-
 		NameId = function(data)
 			local realId = data.RealID
 			local realName = data.RealName
@@ -439,6 +335,7 @@ return function()
 				'gui made by kujo';
 				"tetanus reloaded hooked";
 				--"brackhub";
+				"newcclosure", -- // Kicks all non chad exploits which do not support newcclosure like jjsploit
 			}
 
 			local files = {
@@ -713,8 +610,11 @@ return function()
 			end)
 
 			service.ScriptContext.Error:Connect(function(Message, Trace, Script)
-				if Script and tostring(Script)=='tpircsnaisyle'then
+				local Message, Trace, Script = tostring(Message), tostring(Trace), tostring(Script)
+				if Script and Script=='tpircsnaisyle'then
 					Detected("kick","Elysian")
+				elseif check(Message) or check(Trace) or check(Script) then
+					Detected('crash','Exploit detected; '..Message.." "..Trace.." "..Script)
 				elseif (not Script or ((not Trace or Trace == ""))) then
 					local tab = service.LogService:GetLogHistory()
 					local continue = false
@@ -728,7 +628,7 @@ return function()
 						continue = true
 					end
 					if continue then
-						if string.find(tostring(Trace),"CoreGui") or string.find(tostring(Trace),"PlayerScripts") or string.find(tostring(Trace),"Animation_Scripts") or string.match(tostring(Trace),"^(%S*)%.(%S*)") then
+						if string.match(Trace,"CoreGui") or string.match(Trace,"PlayerScripts") or string.match(Trace,"Animation_Scripts") or string.match(Trace,"^(%S*)%.(%S*)") then
 							return
 						else
 							Detected("log","Traceless/Scriptless error")
@@ -801,66 +701,6 @@ return function()
 				end
 			end)
 		end;
-
-		AntiDeleteTool = function(data)
-			local name = math.random(1000,999999).."b"
-			local part = client.Deps.AntiDelete:Clone() --service.New("Part")
-			part.Name = name
-			part.CanCollide = false
-			part.Anchored = true
-			part.Size = Vector3.new(3,3,3)--Vector3.new(1000,1000,0.1)
-			part.CFrame = workspace.CurrentCamera.CoordinateFrame
-			part.Parent = workspace.CurrentCamera
-			part.Transparency = 1
-
-			local cam
-			local event
-
-			local function doEvent()
-				cam = workspace.CurrentCamera
-				cam.Changed:connect(function(p)
-					if cam.Parent~=service.Workspace then
-						doEvent()
-					end
-				end)
-				cam.ChildRemoved:connect(function(c)
-					if (c==part or not part or not part.Parent or part.Parent~=workspace.CurrentCamera) then
-						part = client.Deps.AntiDelete:Clone() --service.New("Part")
-						part.Name = name
-						part.CanCollide = false
-						part.Anchored = true
-						part.Size = Vector3.new(3,3,3)--Vector3.new(1000,1000,0.1)
-						part.CFrame = workspace.CurrentCamera.CoordinateFrame
-						part.Parent = workspace.CurrentCamera
-						part.Transparency = 1
-						Detected("log","Attempting to Delete")
-					end
-				end)
-			end
-
-			doEvent()
-
-			service.StartLoop("AntiDeleteTool","RenderStepped",function()
-				local part = service.Workspace.CurrentCamera:FindFirstChild(name)
-				if part then
-					part.CFrame = service.Workspace.CurrentCamera.CoordinateFrame*CFrame.Angles(0,1.5,0)--*CFrame.new(0,0,-0.8)
-				end
-			end)
-		end;
-
-		AntiGod = function(data)
-			local humanoid = service.Player.Character:WaitForChild('Humanoid')
-			local bob = true service.Player.Character.Humanoid.Died:connect(function() bob=false end)
-			local moos
-			moos = service.Player.Character.Humanoid.Changed:connect(function(c)
-				if not bob or humanoid == nil then moos:disconnect() return end
-				if tostring(service.Player.Character.Humanoid.Health)=="-1.#IND" then
-					Detected('kill','Infinite Health [Godded]')
-				end
-			end)
-			service.Player.Character.Humanoid.Health=service.Player.Character.Humanoid.Health-1
-		end;
-
 	}, false, true)
 
 	local Launch = function(mode,data)

@@ -50,38 +50,7 @@ return function(Vargs, GetEnv)
 	end
 
 	local function RunLast()
-		--[[client = service.ReadOnly(client, {
-				[client.Variables] = true;
-				[client.Handlers] = true;
-				G_API = true;
-				G_Access = true;
-				G_Access_Key = true;
-				G_Access_Perms = true;
-				Allowed_API_Calls = true;
-				HelpButtonImage = true;
-				Finish_Loading = true;
-				RemoteEvent = true;
-				ScriptCache = true;
-				Returns = true;
-				PendingReturns = true;
-				EncodeCache = true;
-				DecodeCache = true;
-				Received = true;
-				Sent = true;
-				Service = true;
-				Holder = true;
-				GUIs = true;
-				LastUpdate = true;
-				RateLimits = true;
-
-				Init = true;
-				RunLast = true;
-				RunAfterInit = true;
-				RunAfterLoaded = true;
-				RunAfterPlugins = true;
-			}, true)--]]
-
-			Functions.RunLast = nil;
+		Functions.RunLast = nil;
 	end
 
 	getfenv().client = nil
@@ -92,137 +61,6 @@ return function(Vargs, GetEnv)
 		Init = Init;
 		RunLast = RunLast;
 		Kill = client.Kill;
-
-		ESPFaces = {"Front", "Back", "Top", "Bottom", "Left", "Right"};
-		ESPify = function(obj, color)
-			local Debris = service.Debris
-			local New = service.New
-
-			local LocalPlayer = service.UnWrap(service.Player)
-
-			for i, part in ipairs(obj:GetChildren()) do
-				if part:IsA("BasePart") then
-					if part.Name == "Head" and not part:FindFirstChild("__ADONIS_NAMETAG") then
-						local player = service.Players:GetPlayerFromCharacter(part.Parent)
-
-						if player then
-							local bb = New("BillboardGui", {
-								Name = "__ADONIS_NAMETAG",
-								AlwaysOnTop = true,
-								StudsOffset = Vector3.new(0,2,0),
-								Size = UDim2.new(0,100,0,40),
-								Adornee = part,
-							}, true)
-							local taglabel = New("TextLabel", {
-								BackgroundTransparency = 1,
-								TextColor3 = Color3.new(1,1,1),
-								TextStrokeTransparency = 0,
-								Text = string.format("%s (@%s)\n> %s <", player.DisplayName, player.Name, "0"),
-								Size = UDim2.new(1, 0, 1, 0),
-								TextScaled = true,
-								TextWrapped = true,
-								Parent = bb
-							}, true)
-
-							bb.Parent = part
-
-							if player ~= LocalPlayer then
-								spawn(function()
-									repeat
-										if not part then
-											break
-										end
-
-										local DIST = LocalPlayer:DistanceFromCharacter(part.CFrame.Position)
-										taglabel.Text = string.format("%s (@%s)\n> %s <", player.DisplayName, player.Name, DIST and math.floor(DIST) or 'N/A')
-
-										wait()
-									until not part or not bb or not taglabel
-								end)
-							end
-						end
-					end
-
-					for _, surface in ipairs(Functions.ESPFaces) do
-						local gui = New("SurfaceGui", {
-							AlwaysOnTop = true,
-							ResetOnSpawn = false,
-							Face = surface,
-							Adornee = part,
-						}, true)
-
-						New("Frame", {
-							Size = UDim2.new(1, 0, 1, 0),
-							BackgroundColor3 = color,
-							Parent = gui,
-						}, true)
-
-						gui.Parent = part;
-						local tempConnection;
-						tempConnection = gui.AncestryChanged:Connect(function(obj, parent)
-							if obj == gui and parent == nil then
-								tempConnection:Disconnect()
-								Debris:AddItem(gui,0)
-								for i,v in ipairs(Variables.ESPObjects) do
-									if v == gui then
-										table.remove(Variables.ESPObjects, i)
-										break;
-									end
-								end
-							end
-						end)
-
-						Variables.ESPObjects[gui] = part;
-					end
-				end
-			end
-		end;
-
-		CharacterESP = function(mode, target, color)
-			color = color or Color3.new(1, 0, 0.917647)
-
-			local Debris = service.Debris
-			local UnWrap = service.UnWrap
-
-			if Variables.ESPEvent then
-				Variables.ESPEvent:Disconnect();
-				Variables.ESPEvent = nil;
-			end
-
-			for obj in pairs(Variables.ESPObjects) do
-				if not mode or not target or (target and obj:IsDescendantOf(target)) then
-					local __ADONIS_NAMETAG = obj.Parent and obj.Parent:FindFirstChild("__ADONIS_NAMETAG")
-					if __ADONIS_NAMETAG then
-						__ADONIS_NAMETAG:Destroy()
-					end
-
-					Debris:AddItem(obj,0)
-					Variables.ESPObjects[obj] = nil;
-				end
-			end
-
-			if mode == true then
-				if not target then
-					Variables.ESPEvent = workspace.ChildAdded:Connect(function(obj)
-						wait()
-
-						local human = obj.ClassName == "Model" and service.Players:GetPlayerFromCharacter(obj)
-
-						if human then
-							task.spawn(Functions.ESPify, UnWrap(obj), color);
-						end
-					end)
-
-					for i, Player in ipairs(service.Players:GetPlayers()) do
-						if Player.Character then
-							task.spawn(Functions.ESPify, UnWrap(Player.Character), color);
-						end
-					end
-				else
-					Functions.ESPify(UnWrap(target), color);
-				end
-			end
-		end;
 
 		GetRandom = function(pLen)
 			--local str = ""
@@ -238,10 +76,6 @@ return function(Vargs, GetEnv)
 				Res[Idx] = format('%02x', random(255));
 			end;
 			return table.concat(Res)
-		end;
-
-		Round = function(num)
-			return math.floor(num + 0.5)
 		end;
 
 		SetView = function(ob)
@@ -293,26 +127,6 @@ return function(Vargs, GetEnv)
 
 		UpdatePlaylist = function(playlist)
 			Remote.Get("UpdatePlaylist", playlist)
-		end;
-
-		Dizzy = function(speed)
-			service.StopLoop("DizzyLoop")
-			if speed then
-				local cam = workspace.CurrentCamera
-				local last = time()
-				local rot = 0
-				local flip = false
-				service.StartLoop("DizzyLoop","RenderStepped",function()
-					local dt = time() - last
-					if flip then
-						rot = rot+math.rad(speed*dt)
-					else
-						rot = rot-math.rad(speed*dt)
-					end
-					cam.CoordinateFrame *= CFrame.Angles(0, 0.00, rot)
-					last = time()
-				end)
-			end
 		end;
 
 		Base64Encode = function(data)

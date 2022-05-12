@@ -1490,24 +1490,5 @@ return function(Vargs, GetEnv)
 				return 6825455804;
 			end
 		end;
-
-		GetUserInputServiceData = function(args)
-			local data = {}
-			local props = {
-				"AccelerometerEnabled";
-				"GamepadEnabled";
-				"GyroscopeEnabled";
-				"KeyboardEnabled";
-				"MouseDeltaSensitivity";
-				"MouseEnabled";
-				"OnScreenKeyboardVisible";
-				"TouchEnabled";
-				"VREnabled";
-			}
-			for i, p in pairs(props) do
-				data[p] = service.UserInputService[p]
-			end
-			return data
-		end;
 	};
 end

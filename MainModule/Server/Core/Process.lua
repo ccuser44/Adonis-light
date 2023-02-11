@@ -886,7 +886,7 @@ return function(Vargs, GetEnv)
 				end
 
 				if Settings.TopBarShift then
-					MakeGui(p, "TopBar")
+					Remote.Send(p, "SetVariables", { TopBarShift = true })
 				end
 
 				--if Settings.CustomChat then

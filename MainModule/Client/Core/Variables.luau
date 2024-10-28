@@ -82,6 +82,7 @@ return function(Vargs, GetEnv)
 		localSounds = {};
 		ESPObjects = {};
 		CommunicationsHistory = {};
+		IncognitoPlayers = {};
 		LightingSettings = {
 			Ambient = service.Lighting.Ambient;
 			Brightness = service.Lighting.Brightness;

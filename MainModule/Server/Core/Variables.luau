@@ -145,7 +145,7 @@ return function(Vargs, GetEnv)
 
 		DisguiseBindings = {};
 
-		IncognitoPlayers = {};
+		PlayerVisibility = {};
 
 		MusicList = {
 			{Name = "crabrave", 				ID = 5410086218},

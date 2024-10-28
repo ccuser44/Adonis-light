@@ -657,8 +657,6 @@ return service.NewProxy({
 			return Variables.LocalContainer
 		end
 
-		ServiceSpecific.IncognitoPlayers = {}
-
 		--// Load Core Modules
 		log("Loading core modules")
 		for _, load in CORE_LOADING_ORDER do

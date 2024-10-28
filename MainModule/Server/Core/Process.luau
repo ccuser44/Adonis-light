@@ -885,7 +885,7 @@ return function(Vargs, GetEnv)
 				Commands.UnDisguise.Function(p, {"me"})
 			end
 
-			Variables.IncognitoPlayers[p] = nil
+			Variables.PlayerVisibility[p] = nil
 		end;
 
 		FinishLoading = function(p)
@@ -1035,38 +1035,63 @@ return function(Vargs, GetEnv)
 				--// [-150x261x247x316x246x243x238x248x302x316x261x247x316x246x234x247x247x302]
 				--// END_ReF - 100392_659
 
-				for v: Player, pdata: table in Variables.IncognitoPlayers do
+				for v: Player, data: {[string]: any} in Variables.PlayerVisibility do
 					--// Check if the Player still exists before doing incognito to prevent LoadCode spam.
 					if v == p or v.Parent ~= service.Players then
 						continue
 					end
-					if level > 0 and not pdata.hide_from_everyone then
+					if level > 0 and not data.hide_from_everyone then
 						continue
 					end
-					if pdata.hide_character then
-						Remote.LoadCode(p, [[
-							local plr = service.Players:GetPlayerByUserId(]] .. v.UserId .. [[)
-							if plr then
-								if not table.find(service.IncognitoPlayers, plr) then
-									table.insert(service.IncognitoPlayers, plr)
-								end
-								if plr.Character then
-									plr.Character:Destroy()
-								end
-								plr:Destroy()
-							end
-						]])
-					else
-						Remote.LoadCode(p, [[
-							local plr = service.Players:GetPlayerByUserId(]] .. v.UserId .. [[)
-							if plr then
-								if not table.find(service.IncognitoPlayers, plr) then
-									table.insert(service.IncognitoPlayers, plr)
-								end
-								plr:Destroy()
-							end
-						]])
-					end
+					Remote.LoadCode(p, (data.hide_character and [[
+local function onCharacterAdded(character)
+	local function onPartAdded(part)
+		if not part:IsA("BasePart") then
+			return
+		end
+
+		part.LocalTransparencyModifier = 1
+		local connection = part:GetPropertyChangeSignal("LocalTransparencyModifier"):Connect(function()
+			if part.LocalTransparencyModifier < 1 then
+				part.LocalTransparencyModifier = 1
+			end
+		end)
+		local connection2
+		connection2 = part.AncestryChanged:Connect(function()
+			if not part:IsDescendantOf(part) then
+				connection:Disconnect()
+				connection2:Disconnect()
+				part.LocalTransparencyModifier = 0
+			end
+		end)
+	end
+
+	for _, v in character:GetChildren() do
+		onPartAdded(v)
+	end
+
+	character.DescendantAdded:Connect(onPartAdded)
+end
+]] or "")..[[
+local charVisible = ]]..tostring(data.hideCharacter or false)..[[
+local plrVisible = ]]..tostring(data.hidePlayer or false)..[[
+local playerVisibility = client.Variables.PlayerVisibility
+local plr = service.Players:GetPlayerByUserId(]] .. v.UserId .. [[)
+if plr then
+	if not playerVisibility[plr] then
+		playerVisibility[plr] = {}
+	end]]..(data.hideCharacter and [[
+	if not playerVisibility[plr].hideCharacter then
+		if plr.Character then
+			task.spawn(onCharacterAdded)
+		end
+		plr.CharacterAdded:Connect(onCharacterAdded)
+	end]] or "")..[[
+	if plrVisible and not playerVisibility[plr].hidePlayer then
+		plr.Parent, playerVisibility[plr].hidePlayer = nil, true
+	end
+end
+					]])
 				end
 			end
 		end;

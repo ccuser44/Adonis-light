@@ -82,7 +82,7 @@ return function(Vargs, GetEnv)
 		localSounds = {};
 		ESPObjects = {};
 		CommunicationsHistory = {};
-		IncognitoPlayers = setmetatable({}, {__mode = "k"});
+		PlayerVisibility = setmetatable({}, {__mode = "k"});
 		LightingSettings = {
 			Ambient = service.Lighting.Ambient;
 			Brightness = service.Lighting.Brightness;

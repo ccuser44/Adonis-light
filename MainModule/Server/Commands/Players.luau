@@ -1,3 +1,4 @@
+--!nolint DeprecatedGlobal
 return function(Vargs, env)
 	local server = Vargs.Server;
 	local service = Vargs.Service;
@@ -999,6 +1000,7 @@ return function(Vargs, env)
 					}
 				end, function() return end))
 
+				--# selene: allow(deprecated)
 				Remote.MakeGui(plr, "ServerDetails", {
 					CreatorId = game.CreatorId;
 					PrivateServerId = game.PrivateServerId;
@@ -1010,6 +1012,7 @@ return function(Vargs, env)
 					CmdPrefix = Settings.Prefix;
 					CmdPlayerPrefix = Settings.PlayerPrefix;
 					SplitKey = Settings.SplitKey;
+					Version = select(2, pcall(version));
 				})
 			end
 		};

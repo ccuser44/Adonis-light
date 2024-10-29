@@ -110,6 +110,7 @@ return function(data, env)
 			"",
 			{"Server Job ID", game.JobId or "[Error]"},
 			{"Server Type", serverType},
+			{"Server Version", data.Version},
 			"",
 			{"Server Speed", "Loading..."},
 			{"Server Age", "Loading..."},
@@ -135,8 +136,10 @@ return function(data, env)
 					Size = UDim2.new(1, -10, 0, 30);
 					Position = UDim2.new(0, 5, 0, currentPos+5);
 					TextXAlignment = "Left";
-				}):Add("TextLabel", {
+				}):Add("TextBox", {
 					Text = v[2];
+					ClearTextOnFocus = false;
+					TextEditable = false;
 					BackgroundTransparency = 1;
 					AnchorPoint = Vector2.new(1, 0);
 					Size = UDim2.new(1, -150, 1, 0);
@@ -189,14 +192,18 @@ return function(data, env)
 
 			local i = 1
 			for _, v in ipairs(entries) do
-				locationtab:Add("TextLabel", {
+				locationtab:Add("TextBox", {
 					Text = `  {v[1]}:`;
+					ClearTextOnFocus = false;
+					TextEditable = false;
 					BackgroundTransparency = (i%2 == 0 and 0) or 0.2;
 					Size = UDim2.new(1, -10, 0, 30);
 					Position = UDim2.new(0, 5, 0, (30*(i-1))+5);
 					TextXAlignment = "Left";
-				}):Add("TextLabel", {
+				}):Add("TextBox", {
 					Text = v[2];
+					ClearTextOnFocus = false;
+					TextEditable = false;
 					BackgroundTransparency = 1;
 					AnchorPoint = Vector2.new(1, 0);
 					Size = UDim2.new(1, -150, 1, 0);
@@ -389,15 +396,19 @@ return function(data, env)
 				}) do
 				if type(v) == "table" then
 					i += 1
-					workspacetab:Add("TextLabel", {
+					workspacetab:Add("TextBox", {
 						Text = `  {v[1]}:`;
+						ClearTextOnFocus = false;
+						TextEditable = false;
 						ToolTip = v[3];
 						BackgroundTransparency = (i%2 == 0 and 0) or 0.2;
 						Size = UDim2.new(1, -10, 0, 25);
 						Position = UDim2.new(0, 5, 0, currentPos+5);
 						TextXAlignment = "Left";
-					}):Add("TextLabel", {
+					}):Add("TextBox", {
 						Text = v[2];
+						ClearTextOnFocus = false;
+						TextEditable = false;
 						BackgroundTransparency = 1;
 						AnchorPoint = Vector2.new(1, 0);
 						Size = UDim2.new(1, -150, 1, 0);

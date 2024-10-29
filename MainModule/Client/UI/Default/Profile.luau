@@ -392,19 +392,24 @@ return function(data, env)
 			{"Touch Enabled", boolToStr(data.GameData.TouchEnabled), "Whether the user’s current device has a touch-screen available"},
 			{"VR Enabled", boolToStr(data.GameData.VREnabled), "Whether the user is using a virtual reality headset"},
 			{"Source Place ID", data.GameData.SourcePlaceId, "The ID of the place from which the player was teleported to this game, if applicable"},
+			{"Client Version", data.GameData.Version, "The git build version of the Roblox client. NOTE: Doesn't show CoreScript versions."},
 		}
 
 		local i = 1
 		for _, v in ipairs(gameplayDataToDisplay) do
-			local entry = gametab:Add("TextLabel", {
+			local entry = gametab:Add("TextBox", {
 				Text = `  {v[1]}: `;
+				ClearTextOnFocus = false;
+				TextEditable = false;
 				ToolTip = v[3];
 				BackgroundTransparency = i%2 == 0 and 0 or 0.2;
 				Size = UDim2.new(1, -10, 0, 25);
 				Position = UDim2.new(0, 5, 0, 25*(i-1) + 5);
 				TextXAlignment = "Left";
-			}):Add("TextLabel", {
+			}):Add("TextBox", {
 				Text = v[2];
+				ClearTextOnFocus = false;
+				TextEditable = false;
 				BackgroundTransparency = 1;
 				Size = UDim2.new(0, 120, 1, 0);
 				Position = UDim2.new(1, -130, 0, 0);

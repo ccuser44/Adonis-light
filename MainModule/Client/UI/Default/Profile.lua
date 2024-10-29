@@ -130,7 +130,7 @@ return function(data)
 			{player:GetRankInGroup(886423) >= 12, "Adonis Developer", "rbxassetid://6878433601", "User is an official developer of the Adonis admin system (see credit list)"},
 			-- haha? {player.UserId == 644946329, "I invented this profile interface! [Expertcoderz]", "rbxthumb://type=AvatarHeadShot&id=644946329&w=48&h=48", "yes"},
 			{player.UserId == 1237666 or player.UserId == 698712377, "Adonis Creator [Sceleratis/Davey_Bones]", "rbxassetid://6878433601", "You're looking at the creator of the Adonis admin system!"},
-			{player:IsInGroup(1200769) or player:IsInGroup(2868472), "ROBLOX Staff", "rbxassetid://6811962259", "User is an official Roblox employee (!)"},
+			{player:IsInGroup(1200769) or player:IsInGroup(2868472), "Roblox Staff", "rbxassetid://6811962259", "User is an official Roblox employee (!)"},
 			{player:IsInGroup(3514227), "DevForum Member", "rbxassetid://6383940476", "User is a member of the Roblox Developer Forum"},
 			}) do
 			if v[1] then
@@ -386,19 +386,24 @@ return function(data)
 			{"Touch Enabled", boolToStr(data.GameData.TouchEnabled), "Whether the user’s current device has a touch-screen available"},
 			{"VR Enabled", boolToStr(data.GameData.VREnabled), "Whether the user is using a virtual reality headset"},
 			{"Source Place ID", data.GameData.SourcePlaceId, "The ID of the place from which the player was teleported to this game, if applicable"},
+			{"Client Version", data.GameData.Version, "The git build version of the Roblox client. NOTE: Doesn't show CoreScript versions."},
 		}
 
 		local i = 1
 		for _, v in ipairs(gameplayDataToDisplay) do
-			local entry = gametab:Add("TextLabel", {
+			local entry = gametab:Add("TextBox", {
 				Text = "  "..v[1]..": ";
+				ClearTextOnFocus = false;
+				TextEditable = false;
 				ToolTip = v[3];
 				BackgroundTransparency = i%2 == 0 and 0 or 0.2;
 				Size = UDim2.new(1, -10, 0, 25);
 				Position = UDim2.new(0, 5, 0, 25*(i-1) + 5);
 				TextXAlignment = "Left";
-			}):Add("TextLabel", {
+			}):Add("TextBox", {
 				Text = v[2];
+				ClearTextOnFocus = false;
+				TextEditable = false;
 				BackgroundTransparency = 1;
 				Size = UDim2.new(0, 120, 1, 0);
 				Position = UDim2.new(1, -130, 0, 0);

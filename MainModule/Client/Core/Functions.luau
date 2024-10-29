@@ -1,4 +1,5 @@
---# selene: allow(empty_loop)
+--!nolint DeprecatedGlobal
+--# selene: allow(empty_loop, deprecated)
 client = nil
 service = nil
 Pcall = nil
@@ -1870,6 +1871,7 @@ return function(Vargs, GetEnv)
 				data[p] = service.UserInputService[p]
 			end
 			data["Resolution"] = workspace.CurrentCamera.ViewportSize.X.." x "..workspace.CurrentCamera.ViewportSize.Y
+			data["Version"] = select(2, pcall(version))
 			return data
 		end;
 	};

@@ -331,16 +331,20 @@ return function(data, env)
 						Position = UDim2.new(0, 5, 0, (30*(i-1)));
 						TextXAlignment = "Left";
 					})
-					local rankLabel = entry:Add("TextLabel", {
+					local rankLabel = entry:Add("TextBox", {
 						Text = groupInfo.Role;
+						ClearTextOnFocus = false;
+						TextEditable = false;
 						BackgroundTransparency = 1;
 						Size = UDim2.new(0, 0, 1, 0);
 						Position = UDim2.new(1, -10, 0, 0);
 						ClipsDescendants = false;
 						TextXAlignment = "Right";
 					})
-					local groupLabel = entry:Add("TextLabel", {
+					local groupLabel = entry:Add("TextBox", {
 						Text = groupName;
+						ClearTextOnFocus = false;
+						TextEditable = false;
 						BackgroundTransparency = 1;
 						Size = UDim2.new(1, -50-rankLabel.TextBounds.X, 1, 0);
 						Position = UDim2.new(0, 36, 0, 0);

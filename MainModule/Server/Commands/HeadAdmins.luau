@@ -222,9 +222,7 @@ return function(Vargs, env)
 			IsCrossServer = true;
 			CrossServerDenied = true;
 			Function = function(plr: Player, args: {string})
-				if not Core.CrossServer("Message", plr.Name, assert(args[1], "Missing message")) then
-					error("CrossServer handler not ready; please try again later")
-				end
+				assert(Core.CrossServer("Message", plr.Name, assert(args[1], "Missing message")), "CrossServer handler not ready; please try again later")
 			end;
 		};
 
@@ -238,9 +236,7 @@ return function(Vargs, env)
 			IsCrossServer = true;
 			CrossServerDenied = true;
 			Function = function(plr: Player, args: {string})
-				if not Core.CrossServer("Message", plr.Name, assert(args[2], "Missing message"), assert(args[1], "Missing time amount")) then
-					error("CrossServer handler not ready; please try again later")
-				end
+				assert(Core.CrossServer("Message", plr.Name, assert(args[2], "Missing message"), assert(args[1], "Missing time amount")), "CrossServer handler not ready; please try again later")
 			end;
 		};
 
@@ -276,15 +272,8 @@ return function(Vargs, env)
 					Functions.Hint("Updating Map Backup...", {plr})
 				end
 
-				if Variables.BackingupMap then
-					error("Backup Map is in progress. Please try again later!")
-					return
-				end
-				if Variables.RestoringMap then
-					error("Cannot backup map while map is being restored!")
-					return
-				end
-
+				assert(not Variables.BackingupMap, "Backup Map is in progress. Please try again later!")
+				assert(not Variables.RestoringMap, "Cannot backup map while map is being restored!")
 				Variables.BackingupMap = true
 
 				local tempmodel = service.New("Model", {
@@ -474,9 +463,9 @@ return function(Vargs, env)
 					end
 
 					if n == 0 then
-						Functions.Hint(string.format("Placed %s on the incognito list.", service.FormatPlayer(v)), {plr})
+						Functions.Hint(`Placed {service.FormatPlayer(v)} on the incognito list.`, {plr})
 					else
-						Functions.Hint(string.format("Hidden %s from %d other player%s.", service.FormatPlayer(v), n, n == 1 and "" or "s"), {plr})
+						Functions.Hint(`Hidden {service.FormatPlayer(v)} from {n} other player{n == 1 and "" or "s"}.`, {plr})
 					end
 
 					Functions.Notification("Incognito Mode", "You will cease to appear on the player list, on other players' screens.", {v}, 15, "MatIcon://Privacy tip")
@@ -516,15 +505,15 @@ return function(Vargs, env)
 						success, hasBadge = pcall(service.BadgeService.UserHasBadgeAsync, service.BadgeService, v.UserId, badgeId)
 					until success or tries > 2
 					if not success then
-						Functions.Hint(string.format("ERROR: Unable to get badge ownership status for %s; skipped", service.FormatPlayer(v)))
+						Functions.Hint(`ERROR: Unable to get badge ownership status for {service.FormatPlayer(v)}; skipped`)
 						continue
 					end
 					if hasBadge then
-						Functions.Hint(string.format("%s already has the badge '%s'", service.FormatPlayer(v), badgeInfo.Name), {plr})
+						Functions.Hint(`{service.FormatPlayer(v)} already has the badge '{badgeInfo.Name}'", {plr})
 					elseif service.BadgeService:AwardBadge(v.UserId, badgeId) then
-						Functions.Hint(string.format("Successfully awarded badge '%s' for %s", badgeInfo.Name, service.FormatPlayer(v)), {plr})
+						Functions.Hint(`Successfully awarded badge '{badgeInfo.Name}' for {service.FormatPlayer(v)}", {plr})
 					else
-						Functions.Hint(string.format("ERROR: Failed to award badge '%s' for %s due to an unexpected internal error", badgeInfo.Name, service.FormatPlayer(v)), {plr})
+						Functions.Hint(`ERROR: Failed to award badge '{badgeInfo.Name}' for {service.FormatPlayer(v)} due to an unexpected internal error", {plr})
 					end
 				end
 			end

@@ -217,7 +217,7 @@ return function(Vargs, GetEnv)
 		CrossServerDenied = true; --// Makes it so this command cannot be ran via itself causing an infinite spammy loop of cross server commands...
 		IsCrossServer = true; --// Used in settings.CrossServerCommands in case a game creator wants to disable the cross-server commands
 		Function = function(plr: Player, args: {string})
-			if not Core.CrossServer("NewRunCommand", {
+			assert(Core.CrossServer("NewRunCommand", {
 				UserId = plr.UserId;
 				Name = plr.Name;
 				DisplayName = plr.DisplayName;
@@ -225,10 +225,7 @@ return function(Vargs, GetEnv)
 				--MembershipType = plr.MembershipType; -- MessagingService doesn't accept Enums
 				FollowUserId = plr.FollowUserId;
 				AdminLevel = Admin.GetLevel(plr);
-				}, args[1])
-			then
-				error("CrossServer handler not ready (try again later)")
-			end
+			}, args[1]), "CrossServer handler not ready (try again later)")
 		end;
 	};
 
@@ -283,25 +280,25 @@ return function(Vargs, GetEnv)
 			if not Core.CrossServer("Ping") then
 				doDisconnect()
 				error("CrossServer handler not ready (please try again later)")
-			else
-				local closeEvent = Remote.NewPlayerEvent(plr,updateKey, function()
-					doDisconnect()
-				end)
-
-				Logs.TempUpdaters[updateKey] = listUpdate;
-
-				Remote.MakeGui(plr, "List", {
-					Title = "Server List",
-					Tab = listUpdate(),
-					Update = "TempUpdate",
-					UpdateArgs = {{UpdateKey = updateKey}},
-					OnClose = `client.Remote.PlayerEvent('{updateKey}')`,
-					AutoUpdate = if args[1] and (args[1]:lower() == "false" or args[1]:lower() == "no") then nil else 1,
-					TextSelectable = true;
-				})
-
-				delay(500, doDisconnect)
 			end
+
+			local closeEvent = Remote.NewPlayerEvent(plr, updateKey, function()
+				doDisconnect()
+			end)
+
+			Logs.TempUpdaters[updateKey] = listUpdate;
+
+			Remote.MakeGui(plr, "List", {
+				Title = "Server List",
+				Tab = listUpdate(),
+				Update = "TempUpdate",
+				UpdateArgs = {{UpdateKey = updateKey}},
+				OnClose = `client.Remote.PlayerEvent('{updateKey}')`,
+				AutoUpdate = if args[1] and (args[1]:lower() == "false" or args[1]:lower() == "no") then nil else 1,
+				TextSelectable = true;
+			})
+
+			delay(500, doDisconnect)
 		end;
 	};
 
@@ -315,9 +312,8 @@ return function(Vargs, GetEnv)
 		CrossServerDenied = true;
 		IsCrossServer = true;
 		Function = function(plr: Player, args: {string})
-			local question = args[2]
-			if not question then error("You forgot to supply a question! (argument #2)") end
-			local answers = args[1]
+			local answers = assert(args[1], "You forgot to supply the answers! (argument #1)")
+			local question = assert(args[2], "You forgot to supply a question! (argument #2)")
 			local anstab = {}
 			local responses = {}
 			local voteKey = `ADONISVOTE{math.random()}`

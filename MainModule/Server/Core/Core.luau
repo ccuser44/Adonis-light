@@ -917,11 +917,7 @@ return function(Vargs, GetEnv)
 						return ret
 					else
 						logError(`DataStore GetAsync Failed: {ret}`)
-						if Core.DataCache[key] then
-							return Core.DataCache[key]
-						else
-							error(ret)
-						end
+						return assert(Core.DataCache[key], ret)
 					end
 				end, 120, true)
 
@@ -1333,6 +1329,7 @@ return function(Vargs, GetEnv)
 			local rawget = rawget
 			local type = type
 			local error = error
+			local assert = assert
 			local print = print
 			local warn = warn
 			local pairs = pairs
@@ -1363,7 +1360,7 @@ return function(Vargs, GetEnv)
 				SetSetting = Settings.Allowed_API_Calls.Settings;
 			}
 
-			setfenv(1,setmetatable({}, {__metatable = getmetatable(getfenv())}))
+			setfenv(1, setmetatable({}, {__metatable = getmetatable(getfenv())}))
 
 			local API_Specific = {
 				API_Specific = {
@@ -1388,44 +1385,42 @@ return function(Vargs, GetEnv)
 						targ = server[ind]
 					end
 
-					if Settings.G_Access and key == Settings.G_Access_Key and targ and Settings.Allowed_API_Calls[ind] == true then
-						if type(targ) == "table" then
-							return service.NewProxy {
-								__index = function(tab,inde)
-									if targ[inde] ~= nil and API_Special[inde] == nil or API_Special[inde] == true then
-										AddLog(Logs.Script, {
-											Text = `Access to {inde} was granted`;
-											Desc = `A server script was granted access to {inde}`;
-										})
+					assert(Settings.G_Access and key == Settings.G_Access_Key and targ and Settings.Allowed_API_Calls[ind] == true, "Incorrect key or G_Access is disabled")
 
-										if targ[inde]~=nil and type(targ[inde]) == "table" and Settings.G_Access_Perms == "Read" then
-											return service.ReadOnly(targ[inde])
-										else
-											return targ[inde]
-										end
-									elseif API_Special[inde] == false then
-										AddLog(Logs.Script, {
-											Text = `Access to {inde} was denied`;
-											Desc = `A server script attempted to access {inde} via _G.Adonis.Access`;
-										})
+					if type(targ) == "table" then
+						return service.NewProxy {
+							__index = function(tab,inde)
+								if targ[inde] ~= nil and API_Special[inde] == nil or API_Special[inde] == true then
+									AddLog(Logs.Script, {
+										Text = `Access to {inde} was granted`;
+										Desc = `A server script was granted access to {inde}`;
+									})
 
-										error(`Access Denied: {inde}`)
+									if targ[inde] ~= nil and type(targ[inde]) == "table" and Settings.G_Access_Perms == "Read" then
+										return service.ReadOnly(targ[inde])
 									else
-										error(`Could not find {inde}`)
+										return targ[inde]
 									end
-								end;
-								__newindex = function(tabl, inde, valu)
-									if Settings.G_Access_Perms == "Read" then
-										error("Read-only")
-									elseif Settings.G_Access_Perms == "Write" then
-										tabl[inde] = valu
-									end
-								end;
-								__metatable = true;
-							}
-						end
-					else
-						error("Incorrect key or G_Access is disabled")
+								elseif API_Special[inde] == false then
+									AddLog(Logs.Script, {
+										Text = `Access to {inde} was denied`;
+										Desc = `A server script attempted to access {inde} via _G.Adonis.Access`;
+									})
+
+									error(`Access Denied: {inde}`)
+								else
+									error(`Could not find {inde}`)
+								end
+							end;
+							__newindex = function(tabl, inde, valu)
+								if Settings.G_Access_Perms == "Read" then
+									error("Read-only")
+								elseif Settings.G_Access_Perms == "Write" then
+									tabl[inde] = valu
+								end
+							end;
+							__metatable = true;
+						}
 					end
 				end, true);
 

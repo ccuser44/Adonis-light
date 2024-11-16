@@ -214,14 +214,11 @@ return function(Vargs, GetEnv)
 				end
 				assert(time, "Invalid time specified.")
 			end
-			if not Core.CrossServer("GlobalRestartRequest",
+			assert(Core.CrossServer("GlobalRestartRequest",
 				args[1] or "No reason specified.",
 				if args[2] then tonumber(args[2]) else args[2],
 				not (string.lower(args[3]) == "no" or string.lower(args[3]) == "false")
-				)
-			then
-				error("CrossServer handler not ready (try again later)")
-			end
+			), "CrossServer handler not ready (try again later)")
 		end
 	}
 	Commands.AbortGlobalSoftShutdown = {
@@ -234,14 +231,11 @@ return function(Vargs, GetEnv)
 		CrossServerDenied = true;
 		IsCrossServer = true;
 		Function = function(plr: Player, args: {string})
-			if not Core.CrossServer("GlobalRestartRequest",
+			assert(Core.CrossServer("GlobalRestartRequest",
 				"[CRS_SRV]:abort",
 				0,
 				false
-				)
-			then
-				error("CrossServer handler not ready (try again later)")
-			end
+			), "CrossServer handler not ready (try again later)")
 		end
 	}
 	Commands.VIPAbortGlobalServerRestart = {

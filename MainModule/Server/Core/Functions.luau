@@ -527,10 +527,7 @@ return function(Vargs, GetEnv)
 				--// Default to the executor ("me")
 				return {plr}
 			else
-				if string.match(argument, "^##") then
-					error(`String passed to GetPlayers is filtered: {argument}`, 2)
-				end
-
+				assert(not string.match(argument, "^##"), `String passed to GetPlayers is filtered: {argument}`)
 				local selectors = string.gmatch(argument, "([^,]+)")
 
 				--// This is for player commands that take in service.GetPlayers() to make sure someone isnt passing in a message that is insanely long
@@ -741,7 +738,7 @@ return function(Vargs, GetEnv)
 
 		-- ROT 47: ROT13 BUT BETTER
 		Rot47Cipher = function(data,mode)
-			if not (mode == "enc" or mode == "dec") then error("Invalid ROT47 Cipher Mode") end
+			assert(mode == "enc" or mode == "dec", "Invalid ROT47 Cipher Mode")
 
 			local base = 33
 			local range = 126 - 33 + 1
@@ -1487,17 +1484,12 @@ return function(Vargs, GetEnv)
 		end;
 
 		AddJoinFilter = function(name, func)
-			if server.Variables.PlayerJoinFilters[name] then
-				error(string.format("The Join Filter %s already exists!", name))
-			else
-				server.Variables.PlayerJoinFilters[name] = func
-			end
+			assert(not server.Variables.PlayerJoinFilters[name], `The Join Filter {name} already exists!`)
+			server.Variables.PlayerJoinFilters[name] = func
 		end;
 
 		RemoveJoinFilter = function(name)
-			if server.Variables.PlayerJoinFilters[name] then
-				server.Variables.PlayerJoinFilters[name] = nil
-			end
+			server.Variables.PlayerJoinFilters[name] = nil
 		end;
 
 		CheckMatch = function(check, match)

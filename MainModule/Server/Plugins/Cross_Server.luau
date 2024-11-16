@@ -156,7 +156,7 @@ return function(Vargs, GetEnv)
 					while countdown > 0 do
 						countdown -= task.wait(1)
 						if taskobj.R_Status == "Stopping" and abortable then
-							Functions.Hint(`Server restart aborted. Server will no longer restart.`, service.GetPlayers())
+							Functions.Hint("Server restart aborted. Server will no longer restart.", service.GetPlayers())
 							return
 						end
 						updatebracket()

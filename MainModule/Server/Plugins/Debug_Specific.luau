@@ -15,7 +15,6 @@ return function(Vargs, GetEnv)
 		return
 	end
 
-	
 	--[[
 	--// Unfortunately not viable
 	--// TODO: Make this viable perhaps? If done so, expose as a :terminal command
@@ -26,21 +25,18 @@ return function(Vargs, GetEnv)
 		Description = "Attempts to force Adonis to reload";
 		AdminLevel = "Creators";
 		Function = function(plr: Player, args: {string}, data: {any})
-			local rebootHandler = server.Deps.RebootHandler:Clone();
+			assert(server.Runner, "Unable to reload: Runner missing")
+			local rebootHandler = server.Deps.RebootHandler:Clone()
 
-			if server.Runner then
-				rebootHandler.mParent.Value = service.UnWrap(server.ModelParent);
-				rebootHandler.Runner.Value = service.UnWrap(server.Runner);
-				rebootHandler.Model.Value = service.UnWrap(server.Model);
-				rebootHandler.Mode.Value = "REBOOT";
-				task.wait(0.03)
-				rebootHandler.Parent = service.ServerScriptService;
-				rebootHandler.Disabled = false;
-				task.wait(0.03)
-				server.CleanUp();
-			else
-				error("Unable to reload: Runner missing");
-			end
+			rebootHandler.mParent.Value = service.UnWrap(server.ModelParent)
+			rebootHandler.Runner.Value = service.UnWrap(server.Runner)
+			rebootHandler.Model.Value = service.UnWrap(server.Model)
+			rebootHandler.Mode.Value = "REBOOT"
+			task.wait(0.03)
+			rebootHandler.Parent = service.ServerScriptService
+			rebootHandler.Disabled = false
+			task.wait(0.03)
+			server.CleanUp()
 		end;
 	};--]]
 
@@ -152,9 +148,7 @@ else
 end
 -- We can't always directly call the API's functions in some places, namely different Lua VMs, such as the command bar. This allows the script run the functions.
 function WrapAdonisEnv(toWrap, chain)
-	if chain == nil then
-		chain = ""
-	end
+	chain = chain or ""
 
 	if type(toWrap) == "userdata" or type(toWrap) == "table" then
 		local wrapped = newproxy(true)

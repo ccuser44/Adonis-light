@@ -31,5 +31,5 @@ return function(Vargs, GetEnv)
 		end
 	end
 
-	Logs:AddLog("Script", "Current Adonis objects successfully loaded in to instance lists");
+	Logs:AddLog("Script", "Current Adonis objects successfully loaded in to instance lists")
 end

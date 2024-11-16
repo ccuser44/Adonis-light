@@ -358,71 +358,66 @@ return function(Vargs, env)
 			AdminLevel = "Players";
 			Function = function(plr: Player, args: {string})
 				if Settings.HelpSystem == true then
-					local num = 0
-					local answered = false
-					local pending = Variables.HelpRequests[plr.Name];
-					local reason = args[1] or "No reason provided";
+					Functions.Message("HelpSystem", "Help System", "The help system has been disabled by the place owner.", "MatIcon://Error", {plr})
+					return
+				end
 
-					if pending and os.time() - pending.Time < 30 then
-						error("You can only send a help request once every 30 seconds.");
-					elseif pending and pending.Pending then
-						error("You already have a pending request")
-					else
-						service.TrackTask(`Thread: {plr} Help Request Handler`, function()
-							Functions.Hint("Request sent", {plr})
+				local num = 0
+				local answered = false
+				local pending = Variables.HelpRequests[plr.Name]
+				local reason = args[1] or "No reason provided"
 
-							pending = {
-								Time = os.time();
-								Pending = true;
-								Reason = reason;
-							}
+				assert(pending and os.time() - pending.Time < 30, "You can only send a help request once every 30 seconds.")
+				assert(pending and pending.Pending, "You already have a pending request")
+				service.TrackTask(`Thread: {plr} Help Request Handler`, function()
+					Functions.Hint("Request sent", {plr})
+					pending = {
+						Time = os.time();
+						Pending = true;
+						Reason = reason;
+					}
+					Variables.HelpRequests[plr.Name] = pending
 
-							Variables.HelpRequests[plr.Name] = pending;
+					for ind, p in service.Players:GetPlayers() do
+						Routine(function()
+							if Admin.CheckAdmin(p) then
+								local ret = Remote.MakeGuiGet(p, "Notification", {
+									Title = "Help Request";
+									Message = `{plr.Name} needs help! Reason: {pending.Reason}`;
+									Icon = server.MatIcons.Mail;
+									Time = 30;
+									OnClick = Core.Bytecode("return true");
+									OnClose = Core.Bytecode("return false");
+									OnIgnore = Core.Bytecode("return false");
+								})
 
-							for ind, p in service.Players:GetPlayers() do
-								Routine(function()
-									if Admin.CheckAdmin(p) then
-										local ret = Remote.MakeGuiGet(p, "Notification", {
+								num += 1
+								if ret then
+									if not answered then
+										answered = true
+										Commands.Teleport.Function(plr, {p.Name, `@{plr.Name}`})
+									else
+										Remote.MakeGui(p, "Notification", {
 											Title = "Help Request";
-											Message = `{plr.Name} needs help! Reason: {pending.Reason}`;
+											Message = "Another admin has already responded to this request!";
 											Icon = server.MatIcons.Mail;
-											Time = 30;
-											OnClick = Core.Bytecode("return true");
-											OnClose = Core.Bytecode("return false");
-											OnIgnore = Core.Bytecode("return false");
+											Time = 5;
 										})
-
-										num += 1
-										if ret then
-											if not answered then
-												answered = true
-												Commands.Teleport.Function(plr, {p.Name, `@{plr.Name}`})
-											else
-												Remote.MakeGui(p, "Notification", {
-													Title = "Help Request";
-													Message = "Another admin has already responded to this request!";
-													Icon = server.MatIcons.Mail;
-													Time = 5;
-												})
-											end
-										end
 									end
-								end)
-							end
-
-							local w = os.time()
-							repeat task.wait(0.5) until os.time()-w>30 or answered
-
-							pending.Pending = false;
-
-							if not answered then
-								Functions.Message('HelpSystem', "Help System", "Sorry but no one is available to help you right now", 'MatIcon://Warning', {plr})
+								end
 							end
 						end)
 					end
-				else
-					Functions.Message('HelpSystem', "Help System", "The help system has been disabled by the place owner.", 'MatIcon://Error', {plr})
-				end
+
+					local w = os.time()
+					repeat task.wait(0.5) until os.time()-w>30 or answered
+
+					pending.Pending = false;
+
+					if not answered then
+						Functions.Message("HelpSystem", "Help System", "Sorry but no one is available to help you right now", "MatIcon://Warning", {plr})
+					end
+				end)
 			end
 		};
 
@@ -449,17 +444,14 @@ return function(Vargs, env)
 			NoStudio = true; -- TeleportService cannot be used in Roblox Studio
 			AdminLevel = "Players";
 			Function = function(plr: Player, args: {string})
-				assert(args[1], "Argument #1 (username) is required")
-				assert(#args[1] <= 20 and args[1]:match("^[%a%d_]+$"), "Invalid username provided")
+				assert(#assert(args[1], "Argument #1 (username) is required") <= 20 and args[1]:match("^[%a%d_]+$"), "Invalid username provided")
 
 				local UserId = Functions.GetUserIdFromNameAsync(args[1])
 				if UserId then
 					local success, samePlace, errorMessage, placeId, jobId = pcall(service.TeleportService.GetPlayerPlaceInstanceAsync, service.TeleportService, UserId)
 					
 					if success then
-						if samePlace then
-							error("You're already in this server!")
-						end
+						assert(samePlace, "You're already in this server!")
 				
 						if placeId and jobId then
 							service.TeleportService:TeleportAsync(placeId, {plr}, service.New("TeleportOptions", {
@@ -487,9 +479,7 @@ return function(Vargs, env)
 			AdminLevel = "Players";
 			Function = function(plr: Player, args: {string}) -- uses Player:GetFriendsOnline()
 				--// NOTE: MAY NOT WORK IF "ALLOW THIRD-PARTY GAME TELEPORTS" (GAME SECURITY PERMISSION) IS DISABLED
-
-				assert(args[1], "Argument #1 (username) is required")
-				assert(#args[1] <= 20 and args[1]:match("^[%a%d_]+$"), "Invalid username provided")
+				assert(#assert(args[1], "Argument #1 (username) is required") <= 20 and args[1]:match("^[%a%d_]+$"), "Invalid username provided")
 
 				local UserId = Functions.Functions.GetUserIdFromNameAsync(args[1])
 				if UserId then

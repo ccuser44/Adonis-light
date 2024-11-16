@@ -127,13 +127,9 @@ return function(Vargs, GetEnv)
 	local function newRateLimit(rateLimit: table, rateKey: string|number)
 		-- Ratelimit: table
 		-- Ratekey: string or number
+		local rateData = assert(type(rateLimit) == "table" and rateLimit, "Rate data doesn't exist (unable to check)")
 
-		local rateData = (type(rateLimit)=="table" and rateLimit) or nil
-
-		if not rateData then
-			error("Rate data doesn't exist (unable to check)")
-		else
-			-- RATELIMIT TABLE
+		-- RATELIMIT TABLE
 		--[[
 
 			Table:
@@ -151,7 +147,7 @@ return function(Vargs, GetEnv)
 
 		]]
 
-			-- RATECACHE TABLE
+		-- RATECACHE TABLE
 		--[[
 
 			Table:
@@ -164,84 +160,83 @@ return function(Vargs, GetEnv)
 				}
 
 		]]
-			local maxRate: number = math.abs(rateData.Rates) -- Max requests per traffic
-			local resetInterval: number = math.floor(math.abs(rateData.Reset or 1)) -- Interval seconds since the cache last updated to reset
+		local maxRate: number = math.abs(rateData.Rates) -- Max requests per traffic
+		local resetInterval: number = math.floor(math.abs(rateData.Reset or 1)) -- Interval seconds since the cache last updated to reset
 
-			local rateExceeded: boolean? = rateLimit.Exceeded or rateLimit.exceeded
-			local ratePassed: boolean? = rateLimit.Passed or rateLimit.passed
+		local rateExceeded: boolean? = rateLimit.Exceeded or rateLimit.exceeded
+		local ratePassed: boolean? = rateLimit.Passed or rateLimit.passed
 
-			local canThrottle: boolean? = rateLimit.ThrottleEnabled
-			local throttleReset: number? = rateLimit.ThrottleReset
-			local throttleMax: number? = math.floor(math.abs(rateData.ThrottleMax or 1))
+		local canThrottle: boolean? = rateLimit.ThrottleEnabled
+		local throttleReset: number? = rateLimit.ThrottleReset
+		local throttleMax: number? = math.floor(math.abs(rateData.ThrottleMax or 1))
 
-			-- Ensure minimum requirement is followed
-			maxRate = (maxRate>1 and maxRate) or 1
-			-- Max rate must have at least one rate else anything below 1 returns false for all rate checks
+		-- Ensure minimum requirement is followed
+		maxRate = (maxRate>1 and maxRate) or 1
+		-- Max rate must have at least one rate else anything below 1 returns false for all rate checks
 
-			local cacheLib = rateData.Caches
+		local cacheLib = rateData.Caches
 
-			if not cacheLib then
-				cacheLib = {}
-				rateData.Caches = cacheLib
-			end
-
-			-- Check cache
-			local rateCache: table = cacheLib[rateKey]
-			local throttleCache
-			if not rateCache then
-				rateCache = {
-					Rate = 0;
-					Throttle = 0;
-					LastUpdated = os.clock();
-					LastThrottled = nil;
-				}
-
-				cacheLib[rateKey] = rateCache
-			end
-
-			local nowOs = os.clock()
-
-			if nowOs-rateCache.LastUpdated > resetInterval then
-				rateCache.LastUpdated = nowOs
-				rateCache.Rate = 0
-			end
-
-			local ratePass: boolean = rateCache.Rate+1<=maxRate
-
-			local didThrottle: boolean = canThrottle and rateCache.Throttle+1<=throttleMax
-			local throttleResetOs: number? = rateCache.ThrottleReset
-			local canResetThrottle: boolean = throttleResetOs and nowOs-throttleResetOs <= 0
-
-			rateCache.Rate += 1
-
-			-- Check can throttle and whether throttle could be reset
-			if canThrottle and canResetThrottle then
-				rateCache.Throttle = 0
-			end
-
-			-- If rate failed and can also throttle, count tick
-			if canThrottle and (not ratePass and didThrottle) then
-				rateCache.Throttle += 1
-				rateCache.LastThrottled = nowOs
-
-				-- Check whether cache time expired and replace it with a new one or set a new one
-				if not throttleResetOs or canResetThrottle then
-					rateCache.ThrottleReset = nowOs
-				end
-			elseif canThrottle and ratePass then
-				rateCache.Throttle = 0
-			end
-
-			if rateExceeded and not ratePass then
-				rateExceeded:fire(rateKey, rateCache.Rate, maxRate)
-			end
-
-			if ratePassed and ratePass then
-				ratePassed:fire(rateKey, rateCache.Rate, maxRate)
-			end
-
-			return ratePass, didThrottle, canThrottle, rateCache.Rate, maxRate, throttleResetOs
+		if not cacheLib then
+			cacheLib = {}
+			rateData.Caches = cacheLib
 		end
+
+		-- Check cache
+		local rateCache: table = cacheLib[rateKey]
+		local throttleCache
+		if not rateCache then
+			rateCache = {
+				Rate = 0;
+				Throttle = 0;
+				LastUpdated = os.clock();
+				LastThrottled = nil;
+			}
+
+			cacheLib[rateKey] = rateCache
+		end
+
+		local nowOs = os.clock()
+
+		if nowOs-rateCache.LastUpdated > resetInterval then
+			rateCache.LastUpdated = nowOs
+			rateCache.Rate = 0
+		end
+
+		local ratePass: boolean = rateCache.Rate+1<=maxRate
+
+		local didThrottle: boolean = canThrottle and rateCache.Throttle+1<=throttleMax
+		local throttleResetOs: number? = rateCache.ThrottleReset
+		local canResetThrottle: boolean = throttleResetOs and nowOs-throttleResetOs <= 0
+
+		rateCache.Rate += 1
+
+		-- Check can throttle and whether throttle could be reset
+		if canThrottle and canResetThrottle then
+			rateCache.Throttle = 0
+		end
+
+		-- If rate failed and can also throttle, count tick
+		if canThrottle and (not ratePass and didThrottle) then
+			rateCache.Throttle += 1
+			rateCache.LastThrottled = nowOs
+
+			-- Check whether cache time expired and replace it with a new one or set a new one
+			if not throttleResetOs or canResetThrottle then
+				rateCache.ThrottleReset = nowOs
+			end
+		elseif canThrottle and ratePass then
+			rateCache.Throttle = 0
+		end
+
+		if rateExceeded and not ratePass then
+			rateExceeded:fire(rateKey, rateCache.Rate, maxRate)
+		end
+
+		if ratePassed and ratePass then
+			ratePassed:fire(rateKey, rateCache.Rate, maxRate)
+		end
+
+		return ratePass, didThrottle, canThrottle, rateCache.Rate, maxRate, throttleResetOs
 	end
 
 	local RateLimiter = {
@@ -267,8 +262,7 @@ return function(Vargs, GetEnv)
 	local function RateLimit(p, typ)
 		local isPlayer = type(p)=="userdata" and p:IsA"Player"
 		if isPlayer then
-			local rateData = RateLimiter[typ]
-			assert(rateData, `No rate limit data available for the given type {typ}`)
+			local rateData = assert(RateLimiter[typ], `No rate limit data available for the given type {typ}`)
 			local ratePass, didThrottle, canThrottle, curRate, maxRate = newRateLimit(rateData, p.UserId)
 			return ratePass, didThrottle, canThrottle, curRate, maxRate
 		else

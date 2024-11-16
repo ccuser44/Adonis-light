@@ -98,9 +98,7 @@ return function(Vargs, env)
 					Question = `Would you really like to force all game-players to teleport to place '{placeId}'?`;
 				})
 				if ans == "Yes" then
-					if not Core.CrossServer("NewRunCommand", {Name = plr.Name; UserId = plr.UserId, AdminLevel = Admin.GetLevel(plr)}, `{Settings.Prefix}forceplace all {placeId}`) then
-						error("CrossServer handler not ready; please try again later")
-					end
+					assert(Core.CrossServer("NewRunCommand", {Name = plr.Name; UserId = plr.UserId, AdminLevel = Admin.GetLevel(plr)}, `{Settings.Prefix}forceplace all {placeId}`), "CrossServer handler not ready; please try again later")
 				else
 					Functions.Hint("Operation cancelled", {plr})
 				end

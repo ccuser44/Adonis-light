@@ -151,13 +151,11 @@ return function(Vargs, env)
 			Description = "Sends yourself a notification";
 			AdminLevel = "Players";
 			Function = function(plr: Player, args: {string})
-				assert(args[1], "Missing time amount")
-				assert(args[2], "Missing message")
 				Remote.MakeGui(plr, "Notification", {
 					Title = "Notification";
 					Icon = server.MatIcons["Notifications"];
-					Message = args[2];
-					Time = tonumber(args[1]);
+					Time = assert(tonumber(args[1]), "Missing time amount");
+					Message = assert(args[2], "Missing message");
 				})
 			end
 		};
@@ -176,18 +174,20 @@ return function(Vargs, env)
 		RandomNum = {
 			Prefix = Settings.PlayerPrefix;
 			Commands = {"rand", "random", "randnum", "dice"};
-			Args = {"num m", "num n"};
+			Args = {"min", "max"};
 			Description = "Generates a number using Lua's math.random";
 			AdminLevel = "Players";
 			Function = function(plr: Player, args: {any})
-				assert((not args[1]) or tonumber(args[1]), "Argument(s) provided must be numbers")
-				assert((not args[2]) or tonumber(args[2]), "Arguments provided must be numbers")
+				local n1, n2 = tonumber(args[1]), tonumber(args[2])
 
-				if args[2] then
-					assert(args[2] >= args[1], "Second argument n cannot be smaller than first")
-					Functions.Hint(math.random(args[1], args[2]), {plr})
-				elseif args[1] then
-					Functions.Hint(math.random(args[1]), {plr})
+				assert(not args[1] or n1, "Argument(s) provided must be numbers")
+				assert(not args[2] or n2, "Arguments provided must be numbers")
+
+				if n2 then
+					assert(n2 >= n1, "Second argument n cannot be smaller than first")
+					Functions.Hint(math.random(n1, n2), {plr})
+				elseif n1 then
+					Functions.Hint(math.random(n1), {plr})
 				else
 					Functions.Hint(math.random(), {plr})
 				end

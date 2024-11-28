@@ -1682,7 +1682,7 @@ return function(Vargs, env)
 			AdminLevel = "Moderators";
 			Function = function(plr: Player, args: {string})
 				for _, v in service.GetPlayers(plr, args[1]) do
-					Functions.Hint(`{service.FormatPlayer(v)}'s Ping is {v:GetNetworkPing() * 1000}ms`, {plr})
+					Functions.Hint(`{service.FormatPlayer(v)}'s Ping is {math.floor(v:GetNetworkPing() * 1000)}ms`, {plr})
 				end
 			end
 		};

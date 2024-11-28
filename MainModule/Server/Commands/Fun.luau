@@ -875,6 +875,14 @@ return function(Vargs, env)
 			Fun = true;
 			AdminLevel = "Moderators";
 			Function = function(plr: Player, args: {string})
+				local ivisParts = {
+					"LowerTorso", "LeftFoot", "RightFoot",
+					"LeftHand", "RightHand", "LeftLowerArm",
+					"RightLowerArm", "LeftLowerLeg", "RightLowerLeg",
+					"LeftUpperLeg", "RightUpperLeg", "Left Arm",
+					"Right Arm"
+				}
+
 				for _, v in service.GetPlayers(plr, args[1]) do
 					if v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
 						Admin.RunCommand(`{Settings.Prefix}noclip`, v.Name)
@@ -889,10 +897,10 @@ return function(Vargs, env)
 
 						for _, prt in v.Character:GetChildren() do
 							if prt:IsA("BasePart") and prt.Name ~= "HumanoidRootPart" then
-								prt.Transparency = .5
+								prt.Transparency = .95
 								prt.Reflectance = 0
 								prt.BrickColor = BrickColor.new("Institutional white")
-								if prt.Name:find("Leg") then
+								if table.find(ivisParts, prt.Name) then
 									prt.Transparency = 1
 								end
 							end

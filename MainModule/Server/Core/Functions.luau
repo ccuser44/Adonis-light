@@ -1612,21 +1612,19 @@ return function(Vargs, GetEnv)
 		end;
 
 		ParseColor3 = function(str: string)
-			if not str then return nil end
-			if str:lower() == "random" then
+			if not str then
+				return nil
+			elseif str:lower() == "random" then
 				return Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
 			end
 
-			local color = {}
-			for s in string.gmatch(str, "[%d]+") do
-				table.insert(color, tonumber(s))
-			end
+			local color = string.split(str, ",")
 
 			if #color == 3 then
-				return Color3.fromRGB(color[1], color[2], color[3])
+				return Color3.fromRGB(tonumber(color[1]), tonumber(color[2]), tonumber(color[3]))
 			else
-				local brickColor = BrickColor.new(str::any);
-				if str == tostring(brickColor) then
+				local brickColor = BrickColor.new(str)
+				if str:lower() == brickColor.Name:lower() then
 					return brickColor.Color
 				else
 					return
@@ -1634,18 +1632,15 @@ return function(Vargs, GetEnv)
 			end
 		end;
 
-		SHA256 = require(server.Shared.HashLib).SHA256;
-
 		ParseBrickColor = function(str: string, allowNil: boolean?)
 			if not str and allowNil then
 				return nil
-			end
-			if not str or str:lower() == "random" then
+			elseif not str or str:lower() == "random" then
 				return BrickColor.random()
 			end
 
-			local brickColor = BrickColor.new(str::any)
-			if str == tostring(brickColor) then
+			local brickColor = BrickColor.new(str)
+			if str:lower() == brickColor.Name:lower() then
 				return brickColor
 			else
 				-- If provided a Color3, return closest BrickColor
@@ -1656,5 +1651,7 @@ return function(Vargs, GetEnv)
 			end
 			return if allowNil then nil else BrickColor.random()
 		end;
+
+		SHA256 = require(server.Shared.HashLib).SHA256;
 	};
 end

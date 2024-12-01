@@ -3985,12 +3985,39 @@ return function(Vargs, env)
 			Description = "Change Time";
 			AdminLevel = "Moderators";
 			Function = function(plr: Player, args: {string})
+				local timeOfDay = assert(assert(args[1], "Missing time of day argument") and ({
+					-- // Colloquial time definitions
+					midnight = 0,
+					middleofthenight = 2.5,
+					earlymorning = 5,
+					dawn = 6.5,
+					sunrise = 6.75,
+					morning = 9,
+					noon = 12,
+					midday = 12,
+					earlyafternoon = 14,
+					afternoon = 15.25,
+					lateafternoon = 17,
+					sunset = 18,
+					sundown = 18,
+					earlyevening = 18.5,
+					dusk = 18.7,
+					evening = 19.75,
+					lateevening = 21,
+					default = 14.5, -- Roblox default
+					day = 14.5, -- Roblox default
+					night = 0,
+					-- // American time system support
+					0am = 0, 1am = 1, 2am = 2, 3am = 3, 4am = 4, 5am = 5, 6am = 6, 7am = 7, 8am = 8, 9am = 9, 10am = 10, 11am = 11, 12am = 12,
+					12pm = 12, 1pm = 13, 2pm = 14, 3pm = 15, 4pm = 16, 5pm = 17, 6pm = 18, 7pm = 19, 8pm = 20, 9pm = 21, 10pm = 22, 11pm = 23, 12pm = 0,
+				})[string.gsub(string.lower(args[1]), "%s", "")] or tonumber(args[1]), "Invalid time of day given")
+
 				if args[2] then
 					for _, v in service.GetPlayers(plr, args[2]) do
-						Remote.SetLighting(v, "TimeOfDay", args[1])
+						Remote.SetLighting(v, "TimeOfDay", timeOfDay)
 					end
 				else
-					Functions.SetLighting("TimeOfDay", args[1])
+					Functions.SetLighting("TimeOfDay", timeOfDay)
 				end
 			end
 		};
@@ -4003,8 +4030,7 @@ return function(Vargs, env)
 			Description = "Fog Color";
 			AdminLevel = "Moderators";
 			Function = function(plr: Player, args: {string})
-				assert(args[1], "Argument 1 missing")
-				local color = assert(Functions.ParseColor3(args[1]), "Invalid color provided")
+				local color = assert(Functions.ParseColor3(assert(args[1], "Fog color missing")), "Invalid color provided")
 
 				if service.Lighting:FindFirstChildWhichIsA("Atmosphere") then
 					Functions.SetAtmosphere("Color", color)
@@ -4026,14 +4052,16 @@ return function(Vargs, env)
 			Description = "Fog Start/End";
 			AdminLevel = "Moderators";
 			Function = function(plr: Player, args: {string})
+				local fogStart, fogEnd = assert(tonumber(args[1]), "Invalid fog start number"), assert(tonumber(args[1]), "Invalid fog end number")
+
 				if args[3] then
 					for _, v in service.GetPlayers(plr, args[3]) do
-						Remote.SetLighting(v, "FogEnd", args[2])
-						Remote.SetLighting(v, "FogStart", args[1])
+						Remote.SetLighting(v, "FogStart", fogStart)
+						Remote.SetLighting(v, "FogEnd", fogEnd)
 					end
 				else
-					Functions.SetLighting("FogEnd", args[2])
-					Functions.SetLighting("FogStart", args[1])
+					Functions.SetLighting("FogStart", fogStart)
+					Functions.SetLighting("FogEnd", fogEnd)
 				end
 			end
 		};

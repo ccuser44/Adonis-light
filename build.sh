@@ -10,7 +10,7 @@ printf "Building Adonis place file"
 rojo build -o Adonis.rbxl
 
 printf "Building Adonis Standalone"
-run: rojo build -o Adonis_Model.rbxm .github/build.project.json
+rojo build -o Adonis_Model.rbxm .github/build.project.json
 
 printf "Set DebugMode off"
 sed -i "s/DebugMode = true/DebugMode = false/g" Loader/Loader/Loader.server.luau

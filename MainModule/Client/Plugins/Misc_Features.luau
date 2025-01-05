@@ -7,6 +7,10 @@ return function(Vargs, GetEnv)
 	local Settings = client.Settings
 	local Functions, Anti, Core, Logs, Remote, Process, Variables = client.Functions, client.Anti, client.Core, client.Logs, client.Remote, client.Process, client.Variables
 
+	Variables.CanUseEditableImages = pcall(function()
+		service.AssetService:CreateEditableImage:WritePixelsBuffer(Vector2.new(1, 1), Vector2.new(1, 1), buffer.create(4))
+	end)
+
 	-- // Backwards compatibility
 	local Pcall = client.Pcall
 	local function cPcall(func, ...)

@@ -1419,7 +1419,7 @@ return function(Vargs, GetEnv)
 									if Settings.G_Access_Perms == "Read" then
 										error("Read-only")
 									elseif Settings.G_Access_Perms == "Write" then
-										rawset(targ, k, v)
+										targ[k] = v
 									end
 								end;
 								__metatable = true;

@@ -572,6 +572,8 @@ return function(errorHandler, eventChecker, fenceSpecific, env)
 			return new
 		end,
 
+		IsLocked = function(obj) return not pcall(function() obj.Name = obj.Name return obj.Name end) end;
+
 		Timer = function(t,func,check)
 			local start = time()
 			local event; event = service.RunService.RenderStepped:Connect(function()
